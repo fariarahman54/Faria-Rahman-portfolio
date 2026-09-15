@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Faria Rahman — Electrical and Computer Engineering">
+<title>Faria Rahman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="#about">Faria Rahman</a>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#research">Research</a>
+      <a href="#projects">Projects</a>
+      <a href="#experience">Professional Experience</a>
+      <a href="life.html">Life</a>
+      <a href="#contact">Contact</a>
+      <a href="#miscellaneous">Miscellaneous</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section id="about" class="hero">
+  <aside>
+  <div class="portrait">
+    <img src="ss.png" alt="Faria Rahman" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+  </div>
+</aside>
+  <div>
+    <h1>Faria Rahman</h1>
+    <div class="role">M.S. Student in Electrical &amp; Computer Engineering<br>University of Oklahoma</div>
+    <div class="links">
+      <a href="mailto:fariarahman.kuet@gmail.com">Email</a><span>·</span>
+      <a href="#" onclick="return false">LinkedIn</a><span>·</span>
+      <a href="#" onclick="return false">GitHub</a><span>·</span>
+      <a href="#" onclick="return false">CV</a>
+    </div>
+    <p>I am a graduate student in Electrical and Computer Engineering at the University of Oklahoma. My interests lie at the intersection of <strong>machine learning, signal processing, image processing, and biomedical imaging</strong>, with experience spanning computational algorithms and experimental hardware.</p>
+    <p>My graduate research focused on ultrasound imaging, including acoustic structured illumination, phase retrieval, coded excitation, beamforming, hydrophone-based measurements, and hardware validation. I also work on machine-learning approaches for radar and medical-image analysis.</p>
+    <p>Before graduate school, I worked in industrial automation and utilities, with experience in automated systems, PLC-based control, energy optimization, and large-scale operations.</p>
+
+</section>
+
+<section id="research">
+<div class="section-title"><h2>Research</h2><p>Physical-system modeling combined with data-driven methods.</p></div>
+<article class="item">
+<h3>Ultrasound Imaging </h3>
+<div class="meta">University of Oklahoma · Research Experience</div>
+<article class="item research-card" style="display: flex; gap: 1rem; align-items: flex-start;">
+  <img src="TXPD_DeltaD_0.80mm.png" alt="Acoustic Structured Illumination" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">
+  <div>
+    <h3>
+      <a href="research/asi-patterns.html" style="color: #0066cc; text-decoration: none;">
+        Multi-Beam Acoustic Structured Illumination: Implementation and Evaluation
+      </a>
+    </h3>
+
+    <p>Implemented and evaluated multi-beam Acoustic Structured Illumination patterns using established Gerchberg–Saxton and STAR phase-retrieval algorithms. Evaluated beamforming and imaging performance through simulation and hardware experiments.</p>
+  </div>
+</article>
+
+<p>Implemented Golay, Barker, and Hadamard coded-excitation approaches and integrated multi-angle plane-wave and super-resolution ultrasound workflows.</p>
+
+<article class="item research-card" style="display: flex; gap: 1rem; align-items: flex-start;">
+  <img src="research/aims-setup-assets/photo-setup-overview.jpeg" alt="Hydrophone-based acoustic intensity measurement setup" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">
+  <div>
+    <h3>
+      <a href="research/aims-setup.html" style="color: #0066cc; text-decoration: none;">
+        Acoustic Intensity Measurement System: Hydrophone-Based Pressure-Field Setup
+      </a>
+    </h3>
+    <p>Integrated and debugged a hydrophone-based ultrasound pressure-field measurement system — a precision digitizer, 3-axis motorized stage, and hydrophone signal chain — resolving hardware and LabVIEW/MATLAB software failures to bring an inherited setup to measurement-ready status.</p>
+  </div>
+</article>
+</article>
+</section>
+
+<section id="projects">
+<div class="section-title"><h2>Projects</h2><p>Click a project title to view the full project page, figures, methodology, and results.</p></div>
+
+<article class="item project-card"
+         style="display: flex; gap: 1rem; align-items: flex-start;">
+
+  <img src="projects/radar-cnn/radar_cnn.png"
+       alt="CNN-Based Target Classification Using FMCW Radar Range-Doppler Maps"
+       style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">
+
+  <div>
+
+    <h3>
+      <a class="project-title"
+         href="projects/radar-cnn/"
+         style="color: #0066cc; text-decoration: none;">
+        CNN-Based Target Classification Using FMCW Radar Range-Doppler Maps
+      </a>
+    </h3>
+
+    <div class="meta">
+      Python · PyTorch · NumPy · scikit-learn · CARRADA · 2026
+    </div>
+
+    <p>
+      Designed a lightweight three-block CNN for automotive radar target
+      classification. Built the signal-processing chain from FMCW radar data
+      to Range-Doppler maps and compared learned features against an SVM baseline.
+    </p>
+
+    <p>
+      <strong>Result:</strong> 89.6% test accuracy · 0.89 macro F1-score.
+    </p>
+
+  </div>
+
+</article>
+
+<article class="item project-card"
+         style="display: flex; gap: 1rem; align-items: flex-start;">
+
+  <img src="projects/unet-segmentation/assets/unet_segmentation.png"
+       alt="Deep Learning-Based Medical Image Segmentation Using U-Net"
+       style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">
+
+  <div>
+
+    <h3>
+      <a class="project-title"
+         href="projects/unet-segmentation/"
+        style="color: #0066cc; text-decoration: none;">
+        Deep Learning-Based Medical Image Segmentation Using U-Net
+      </a>
+    </h3>
+
+    <div class="meta">
+      Python · PyTorch · Albumentations · BUSI · 2026
+    </div>
+
+    <p>
+      Built an end-to-end U-Net pipeline for automated breast-lesion
+      segmentation using the BUSI dataset. The project included image
+      preprocessing, augmentation, model training, and quantitative
+      evaluation using Dice and IoU metrics. Five loss functions were
+      compared under controlled experimental conditions.
+    </p>
+
+    <p>
+      <strong>Result:</strong> Focal Loss achieved Dice 0.783 and IoU 0.644.
+    </p>
+
+    <div class="project-link">
+      <a href="projects/unet-segmentation/">
+
+      </a>
+    </div>
+
+  </div>
+
+</article>
+</section>
+
+<section id="experience">
+<div class="section-title"><h2>Professional Experience</h2></div>
+<article class="experience">
+<div class="date">Oct 2022 – Sep 2023</div>
+<div>
+<h3>Mechanical Engineer — Utilities &amp; Automation</h3>
+<div class="meta">British American Tobacco Bangladesh</div>
+<p>Engineered a load-based dynamic control strategy for HVAC and chiller systems using real-time operating data. Monitored automated utility systems including boilers, chillers, water treatment, and humidity control.</p>
+<p>Maintained PLC-based automation for RO/STP systems and dual-fuel burner control.</p>
+<p>Led a water-recycling initiative that reduced groundwater usage by <strong>50%</strong> and earned AWS Audit Certification.</p>
+</div>
+</article>
+<article class="experience">
+<div class="date">Sep 2022</div>
+<div>
+<h3>Trainee</h3>
+<div class="meta">Huawei Technologies Ltd.</div>
+<p>Built foundational experience in IoT, cloud computing, 5G, and AI applications through Huawei's Seeds for the Future program.</p>
+</div>
+</article>
+</section>
+
+<section id="life">
+<div class="section-title"><h2>Life</h2><p>A bit about who I am outside the lab.</p></div>
+<article class="item">
+<h3><a href="life.html" style="color: #0066cc; text-decoration: none;">Beyond Research</a></h3>
+<p>Favorite books, movies, quotes, and the things I do when I'm not debugging LabVIEW or training models.</p>
+</article>
+</section>
+
+<section id="contact" class="contact">
+<div class="section-title"><h2>Contact</h2></div>
+<p>I am open to opportunities involving machine learning, signal processing, computer vision, medical imaging, algorithm development, and engineering systems.</p>
+<p><a class="email" href="mailto:fariarahman.kuet@gmail.com">fariarahman.kuet@gmail.com</a></p>
+<p>Norman, Oklahoma, USA · Open to relocation</p>
+<div class="links"><a href="#" onclick="return false">LinkedIn</a><span>·</span><a href="#" onclick="return false">GitHub</a></div>
+</section>
+
+<section id="miscellaneous">
+<div class="section-title"><h2>Miscellaneous</h2></div>
+<div class="grid">
+<div>
+<h3>Awards &amp; Certifications</h3>
+<p>AWS Audit Certification (2023).</p>
+<p>Huawei Seeds for the Future Champion (2022).</p>
+<p>Merit Scholarships, Government National Awards (2014, 2016).</p>
+</div>
+<div>
+<h3>Skills</h3>
+<p><strong>Programming:</strong> Python, MATLAB, C, C++</p>
+<p><strong>Machine Learning / Deep Learning:</strong> PyTorch, TensorFlow, scikit-learn, NumPy</p>
+<p><strong>Signal &amp; Image Processing:</strong> FFT, range/Doppler processing, beamforming, filtering, U-Net, CNNs</p>
+<p><strong>Hardware:</strong> Microcontrollers, Arduino, VHDL, Verilog, PSpice, oscilloscopes, DMM</p>
+<p><strong>Tools:</strong> LabVIEW, Microwind, Autodesk Fusion 360</p>
+</div>
+<div>
+<h3>Leadership</h3>
+<p>Led operations across 7 manufacturing facilities and managed a team of 50 employees.</p>
+</div>
+<div>
+<h3>Activities</h3>
+<p>EEE Makers Hub, KUET — PR Secretary (2020–2022).</p>
+<p>Bangladesh Advanced Robotics Research Center — Volunteer (2020).</p>
+<p>Robo Adda — Video editor producing robotics and programming tutorials (2021–2022).</p>
+</div>
+<div>
+<h3>University of Oklahoma</h3>
+<p>M.S. Electrical &amp; Computer Engineering<br>Fall 2025 – Summer 2027<br>CGPA 4.00/4.00</p>
+</div>
+<div>
+<h3>Khulna University of Engineering &amp; Technology</h3>
+<p>B.S. Electrical &amp; Electronic Engineering<br>Feb 2017 – Apr 2022<br>CGPA 3.53/4.00</p>
+</div>
+</div>
+</section>
+</main>
+
+<footer>© 2026 Faria Rahman · Electrical &amp; Computer Engineering · University of Oklahoma</footer>
+<script src="script.js"></script>
+</body>
+</html>
