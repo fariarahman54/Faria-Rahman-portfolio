@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Breast Ultrasound Lesion Segmentation with U-Net</title>
+<meta name="description" content="Automated breast lesion segmentation on the BUSI ultrasound dataset using U-Net, with a controlled comparison of five loss functions (BCE, MSE, Dice, DiceBCE, Focal).">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩻</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="dot"></span>Ultrasound Lesion Segmentation</a>
+    <ul class="navlinks">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#pipeline">Method</a></li>
+      <li><a href="#losses">Loss Functions</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#findings">Findings</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header id="top" class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Digital Image Processing &middot; Final Project</span>
+    <h1>Deep Learning&#8211;Based Breast Ultrasound Lesion Segmentation with U&#8209;Net</h1>
+    <p class="subtitle">
+      An end-to-end segmentation pipeline for the BUSI breast ultrasound dataset, built around a
+      from-scratch U-Net and a controlled, five-way comparison of loss functions to find the
+      training objective best suited to class-imbalanced lesion segmentation.
+    </p>
+    <p class="byline"><strong>Faria Rahman</strong> &middot; School of Electrical and Computer Engineering &middot; 2026</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="assets/UNET_BUSI_segmentation_DIP_project.pdf" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        Read the paper
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/YOUR-USERNAME/YOUR-REPO" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.09 3.29 9.4 7.86 10.93.58.11.79-.25.79-.56v-2.17c-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.04-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.71 0-1.26.45-2.29 1.19-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.44-2.7 5.42-5.27 5.7.41.36.78 1.06.78 2.14v3.17c0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+        View code on GitHub
+      </a>
+      <a class="btn btn-ghost" href="code/Segmentation_using_UNET.ipynb" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Notebook
+      </a>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="num">0.783</div>
+        <div class="lbl">Best Dice score<br>(Focal Loss)</div>
+      </div>
+      <div class="stat">
+        <div class="num">0.644</div>
+        <div class="lbl">Best IoU<br>(Focal Loss)</div>
+      </div>
+      <div class="stat">
+        <div class="num">780</div>
+        <div class="lbl">BUSI image&#8211;mask pairs</div>
+      </div>
+      <div class="stat">
+        <div class="num">5</div>
+        <div class="lbl">Loss functions<br>compared head-to-head</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section id="overview">
+    <div class="wrap">
+      <p class="kicker">Overview</p>
+      <h2>Why loss function choice matters for ultrasound segmentation</h2>
+      <p>
+        Accurate segmentation of lesions in breast ultrasound images is essential for clinical
+        diagnosis, treatment planning, and quantitative biomedical analysis &mdash; but manual
+        delineation is slow, observer-dependent, and highly sensitive to the speckle noise, low
+        tissue contrast, and poorly defined boundaries that are inherent to ultrasound imaging.
+      </p>
+      <p>
+        This project builds an automated breast lesion segmentation system on the U-Net
+        architecture, trained and evaluated on the public
+        <strong>Breast Ultrasound Images (BUSI)</strong> dataset. Rather than tuning a single
+        model, the core experiment holds architecture, data, and training schedule fixed and
+        varies only the loss function &mdash; Binary Cross-Entropy, Mean Squared Error, Dice
+        Loss, combined Dice&#8211;BCE, and Focal Loss &mdash; to isolate exactly how much the
+        training objective matters for class-imbalanced medical segmentation.
+      </p>
+      <p>
+        Every model is evaluated on an identical held-out test set using the Dice coefficient and
+        Intersection over Union (IoU). Segmentation-aware losses consistently beat pixel-wise
+        regression objectives, with <strong>Focal Loss</strong> coming out on top at a Dice score
+        of <strong>0.783</strong> and IoU of <strong>0.644</strong>, versus MSE's <strong>0.661</strong>
+        / <strong>0.498</strong>.
+      </p>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <div class="wrap">
+      <p class="kicker">Method</p>
+      <h2>Dataset, preprocessing &amp; the U-Net pipeline</h2>
+
+      <h3>Dataset</h3>
+      <p>
+        The BUSI dataset contains <strong>780 grayscale ultrasound images</strong> (benign,
+        malignant, and normal cases) paired with binary ground-truth masks. All 780 image&#8211;mask
+        pairs are used, split <strong>80&#8201;/&#8201;10&#8201;/&#8201;10</strong> into train,
+        validation, and test sets via stratified random sampling with a fixed seed for
+        reproducibility.
+      </p>
+
+      <h3>Preprocessing &amp; augmentation</h3>
+      <p>
+        Images are resized to <code>256&times;256</code> and normalized to zero mean / unit
+        variance. Only the training split is augmented, via
+        <a href="https://albumentations.ai/" target="_blank" rel="noopener">Albumentations</a>:
+      </p>
+      <ul class="plain">
+        <li>Horizontal (p=0.5) and vertical (p=0.3) flips</li>
+        <li>Random rotation within &plusmn;30&deg;</li>
+        <li>Affine transforms &mdash; scale 0.85&#8211;1.15&times;, translate &plusmn;10%, rotate &plusmn;20&deg;</li>
+        <li>Elastic deformation and grid distortion (p=0.3 each)</li>
+        <li>Random brightness / contrast perturbation (&plusmn;20%)</li>
+        <li>Gaussian blur and Gaussian noise injection (p=0.2 each)</li>
+      </ul>
+      <p>Validation and test images are only resized and normalized &mdash; no stochastic augmentation.</p>
+
+      <h3>U-Net architecture</h3>
+      <p>
+        A standard U-Net with batch normalization: four encoder blocks (each two
+        <code>3&times;3</code> convolutions + BatchNorm + ReLU) doubling channels
+        64&#8594;128&#8594;256&#8594;512, connected by <code>2&times;2</code> max-pooling; a
+        1024-channel bottleneck; and a mirrored decoder using transposed-convolution upsampling
+        with skip connections back to each encoder stage. The output is a single-channel sigmoid
+        map. <strong>&asymp;31.0M</strong> trainable parameters in total.
+      </p>
+
+      <div class="pipeline" role="img" aria-label="U-Net encoder-decoder pipeline diagram">
+        <div class="pblock"><div class="box">In</div><div class="tag">256&sup2;&times;1</div></div>
+        <div class="parrow">&#8594;</div>
+        <div class="pblock"><div class="box">Enc1</div><div class="tag">64ch</div></div>
+        <div class="parrow">&#8594;</div>
+        <div class="pblock"><div class="box">Enc2</div><div class="tag">128ch</div></div>
+        <div class="parrow">&#8594;</div>
+        <div class="pblock"><div class="box">Enc3</div><div class="tag">256ch</div></div>
+        <div class="parrow">&#8594;</div>
+        <div class="pblock"><div class="box">Enc4</div><div class="tag">512ch</div></div>
+        <div class="parrow">&#8594;</div>
+        <div class="pblock bottleneck"><div class="box">Bottleneck</div><div class="tag">1024ch</div></div>
+        <div class="parrow">&#8594;</div>
+        <div class="pblock"><div class="box">Dec4</div><div class="tag">512ch</div></div>
+        <div class="parrow">&#8594;</div>
+        <div class="pblock"><div class="box">Dec3</div><div class="tag">256ch</div></div>
+        <div class="parrow">&#8594;</div>
+        <div class="pblock"><div class="box">Dec2</div><div class="tag">128ch</div></div>
+        <div class="parrow">&#8594;</div>
+        <div class="pblock"><div class="box">Dec1</div><div class="tag">64ch</div></div>
+        <div class="parrow">&#8594;</div>
+        <div class="pblock"><div class="box">Out</div><div class="tag">1ch, &sigma;</div></div>
+      </div>
+      <div class="pipeline-legend">
+        <span><span class="swatch enc"></span>Encoder / decoder block</span>
+        <span><span class="swatch bnk"></span>Bottleneck</span>
+        <span>Skip connections concatenate each encoder stage into its matching decoder stage.</span>
+      </div>
+
+      <h3>Training setup</h3>
+      <p>
+        Adam optimizer (<code>lr = 1e-4</code>), 50 epochs, batch size 16, on an NVIDIA RTX 4080.
+        A <code>ReduceLROnPlateau</code> scheduler (patience 5, factor 0.5, min_lr 1e-6) decays the
+        learning rate on validation-loss plateaus; the checkpoint with the best validation loss is
+        kept for final test-set evaluation.
+      </p>
+    </div>
+  </section>
+
+  <section id="losses">
+    <div class="wrap">
+      <p class="kicker">Loss Functions</p>
+      <h2>Five loss functions, one identical U-Net</h2>
+      <p>Each loss is trained under the exact same architecture, data splits, and schedule so that any performance gap comes from the objective alone.</p>
+
+      <div class="loss-grid">
+        <div class="loss-card">
+          <div class="name">Binary Cross-Entropy</div>
+          <div class="formula">L = &minus;[y&middot;log(p) + (1&minus;y)&middot;log(1&minus;p)]</div>
+          <p>Penalizes every pixel independently. Sensitive to class imbalance since background vastly outnumbers lesion pixels.</p>
+        </div>
+        <div class="loss-card">
+          <div class="name">Mean Squared Error</div>
+          <div class="formula">L = (p &minus; y)&sup2;</div>
+          <p>Included as a regression baseline. Not naturally suited to binary segmentation &mdash; the weakest performer here.</p>
+        </div>
+        <div class="loss-card">
+          <div class="name">Dice Loss</div>
+          <div class="formula">L = 1 &minus; (2|P&cap;T|+&epsilon;) / (|P|+|T|+&epsilon;)</div>
+          <p>Directly maximizes mask overlap. Inherently robust to class imbalance by operating on whole regions.</p>
+        </div>
+        <div class="loss-card">
+          <div class="name">Dice + BCE</div>
+          <div class="formula">L = L<sub>Dice</sub> + L<sub>BCE</sub></div>
+          <p>Hybrid objective that stabilizes gradients while keeping Dice's overlap-maximizing property.</p>
+        </div>
+        <div class="loss-card best">
+          <div class="name">Focal Loss <span class="pill">Best</span></div>
+          <div class="formula">L = &alpha;(1&minus;p<sub>t</sub>)<sup>&gamma;</sup>&middot;BCE(p,y)</div>
+          <p>&alpha;=0.8, &gamma;=2 &mdash; down-weights easy background pixels and concentrates learning on hard boundary pixels.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="results">
+    <div class="wrap">
+      <p class="kicker">Results</p>
+      <h2>Segmentation-aware losses win, consistently</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Loss function</th><th>Dice score</th><th>IoU</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>BCE</td><td class="num">0.721</td><td class="num">0.566</td></tr>
+            <tr><td>MSE</td><td class="num">0.661</td><td class="num">0.498</td></tr>
+            <tr><td>Dice</td><td class="num">0.775</td><td class="num">0.633</td></tr>
+            <tr><td>DiceBCE</td><td class="num">0.776</td><td class="num">0.636</td></tr>
+            <tr class="best"><td>Focal</td><td class="num">0.783</td><td class="num">0.644</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure>
+        <img src="assets/quantitative_summary.png" alt="Bar chart of test-set Dice score and IoU for each loss function" loading="lazy">
+        <figcaption>Test-set Dice score and IoU by loss function. Focal, DiceBCE, and Dice cluster well above BCE, with MSE trailing furthest behind.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="assets/loss_curves.png" alt="Training loss, validation Dice, and validation IoU curves over 50 epochs for each loss function" loading="lazy">
+        <figcaption>
+          Training loss (left), validation Dice (center), and validation IoU (right) over 50 epochs. BCE and MSE show slow, late-onset convergence &mdash;
+          BCE's validation metrics barely move until around epoch 12. DiceBCE and Focal converge fastest, reaching near-maximum validation Dice within the first
+          20 epochs and holding a stable plateau afterward.
+        </figcaption>
+      </figure>
+
+      <figure>
+        <img src="assets/qualitative_comparison.png" alt="Grid comparing raw ultrasound image, ground-truth mask, and predicted mask from each loss function across six test samples" loading="lazy">
+        <figcaption>
+          Six representative test samples: raw image, ground truth, and binarized predictions from each model. MSE produces scattered false-positive
+          fragments; BCE captures broad lesion extent but with ragged, sometimes split boundaries; Dice and DiceBCE are more compact but can over- or
+          under-segment low-contrast cases; Focal produces the cleanest masks, especially on small lesions. The no-lesion case (row 3) is correctly
+          predicted as all-black by every model.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="findings">
+    <div class="wrap">
+      <p class="kicker">Discussion</p>
+      <h2>Key findings</h2>
+      <div class="findings">
+        <div class="finding">
+          <div class="idx">01</div>
+          <p>Losses that encode spatial overlap (Dice, DiceBCE, Focal) consistently and substantially outperform losses that treat pixels independently (BCE, MSE).</p>
+        </div>
+        <div class="finding">
+          <div class="idx">02</div>
+          <p>MSE is the weakest objective for binary segmentation &mdash; minimizing squared error doesn't reward spatial coherence, so predictions stay diffuse and low-confidence.</p>
+        </div>
+        <div class="finding">
+          <div class="idx">03</div>
+          <p>Focal Loss edges out the rest by suppressing gradient from easy, well-classified background and concentrating learning on ambiguous boundary pixels &mdash; the main source of error in low-contrast ultrasound.</p>
+        </div>
+        <div class="finding">
+          <div class="idx">04</div>
+          <p>Dice and DiceBCE land almost identically, suggesting the extra BCE term adds little here, though it may help stability on more heterogeneous datasets.</p>
+        </div>
+        <div class="finding">
+          <div class="idx">05</div>
+          <p>No model introduces systematic false positives on normal (lesion-free) tissue &mdash; every loss function correctly predicts an all-black mask on those cases.</p>
+        </div>
+        <div class="finding">
+          <div class="idx">06</div>
+          <p>Limitations: a plain U-Net without attention or residual connections, benign/malignant/normal treated uniformly, and a fixed 50-epoch budget &mdash; all natural directions for follow-up work (attention U-Net, transformer decoders, multi-class analysis, loss-specialized ensembles).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stack">
+    <div class="wrap">
+      <p class="kicker">Tech Stack</p>
+      <h2>Built with</h2>
+      <div class="chips">
+        <span class="chip">PyTorch</span>
+        <span class="chip">OpenCV</span>
+        <span class="chip">Albumentations</span>
+        <span class="chip">NumPy / pandas</span>
+        <span class="chip">scikit-learn</span>
+        <span class="chip">Matplotlib</span>
+        <span class="chip">Google Colab &middot; RTX 4080</span>
+        <span class="chip">BUSI Dataset</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <span>&copy; 2026 Faria Rahman &middot; Digital Image Processing Final Project</span>
+  <span class="flinks">
+    <a href="https://your-personal-site.example.com" target="_blank" rel="noopener">&larr; Back to projects</a>
+    <a href="https://github.com/YOUR-USERNAME/YOUR-REPO" target="_blank" rel="noopener">GitHub</a>
+    <a href="assets/UNET_BUSI_segmentation_DIP_project.pdf" target="_blank" rel="noopener">Paper (PDF)</a>
+  </span>
+</footer>
+
+</body>
+</html>
