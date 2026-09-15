@@ -20,9 +20,7 @@
       <a href="#research">Research</a>
       <a href="#projects">Projects</a>
       <a href="#experience">Professional Experience</a>
-      <a href="#skills">Skills</a>
-      <a href="#leadership">Leadership &amp; Activities</a>
-      <a href="#education">Education</a>
+      <a href="life.html">Life</a>
       <a href="#contact">Contact</a>
       <a href="#miscellaneous">Miscellaneous</a>
     </nav>
@@ -48,7 +46,7 @@
     <p>I am a graduate student in Electrical and Computer Engineering at the University of Oklahoma. My interests lie at the intersection of <strong>machine learning, signal processing, image processing, and biomedical imaging</strong>, with experience spanning computational algorithms and experimental hardware.</p>
     <p>My graduate research focused on ultrasound imaging, including acoustic structured illumination, phase retrieval, coded excitation, beamforming, hydrophone-based measurements, and hardware validation. I also work on machine-learning approaches for radar and medical-image analysis.</p>
     <p>Before graduate school, I worked in industrial automation and utilities, with experience in automated systems, PLC-based control, energy optimization, and large-scale operations.</p>
-    
+
 </section>
 
 <section id="research">
@@ -64,13 +62,24 @@
         Multi-Beam Acoustic Structured Illumination: Implementation and Evaluation
       </a>
     </h3>
-    
+
     <p>Implemented and evaluated multi-beam Acoustic Structured Illumination patterns using established Gerchberg–Saxton and STAR phase-retrieval algorithms. Evaluated beamforming and imaging performance through simulation and hardware experiments.</p>
   </div>
 </article>
 
 <p>Implemented Golay, Barker, and Hadamard coded-excitation approaches and integrated multi-angle plane-wave and super-resolution ultrasound workflows.</p>
-<p>Developed a hydrophone-based laboratory setup for measuring and characterizing ultrasound pressure fields and validating acoustic beam profiles.</p>
+
+<article class="item research-card" style="display: flex; gap: 1rem; align-items: flex-start;">
+  <img src="research/aims-setup-assets/photo-setup-overview.jpeg" alt="Hydrophone-based acoustic intensity measurement setup" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">
+  <div>
+    <h3>
+      <a href="research/aims-setup.html" style="color: #0066cc; text-decoration: none;">
+        Acoustic Intensity Measurement System: Hydrophone-Based Pressure-Field Setup
+      </a>
+    </h3>
+    <p>Integrated and debugged a hydrophone-based ultrasound pressure-field measurement system — a precision digitizer, 3-axis motorized stage, and hydrophone signal chain — resolving hardware and LabVIEW/MATLAB software failures to bring an inherited setup to measurement-ready status.</p>
+  </div>
+</article>
 </article>
 </section>
 
@@ -124,7 +133,7 @@
     <h3>
       <a class="project-title"
          href="projects/unet-segmentation/"
-        style="color: #0066cc; text-decoration: none;"> 
+        style="color: #0066cc; text-decoration: none;">
         Deep Learning-Based Medical Image Segmentation Using U-Net
       </a>
     </h3>
@@ -147,14 +156,14 @@
 
     <div class="project-link">
       <a href="projects/unet-segmentation/">
-        
+
       </a>
     </div>
 
   </div>
 
 </article>
-
+</section>
 
 <section id="experience">
 <div class="section-title"><h2>Professional Experience</h2></div>
@@ -178,45 +187,12 @@
 </article>
 </section>
 
-<section id="skills">
-<div class="section-title"><h2>Skills</h2></div>
-<div class="skills-list">
-<p><strong>Programming:</strong> Python, MATLAB, C, C++</p>
-<p><strong>Machine Learning / Deep Learning:</strong> PyTorch, TensorFlow, scikit-learn, NumPy</p>
-<p><strong>Signal &amp; Image Processing:</strong> FFT, range/Doppler processing, beamforming, filtering, U-Net, CNNs</p>
-<p><strong>Hardware:</strong> Microcontrollers, Arduino, VHDL, Verilog, PSpice, oscilloscopes, DMM</p>
-<p><strong>Tools:</strong> LabVIEW, Microwind, Autodesk Fusion 360</p>
-</div>
-</section>
-
-<section id="leadership">
-<div class="section-title"><h2>Leadership &amp; Activities</h2></div>
-<div class="grid">
-<div>
-<h3>Leadership</h3>
-<p>Led operations across 7 manufacturing facilities and managed a team of 50 employees.</p>
-</div>
-<div>
-<h3>Activities</h3>
-<p>EEE Makers Hub, KUET — PR Secretary (2020–2022).</p>
-<p>Bangladesh Advanced Robotics Research Center — Volunteer (2020).</p>
-<p>Robo Adda — Video editor producing robotics and programming tutorials (2021–2022).</p>
-</div>
-</div>
-</section>
-
-<section id="education">
-<div class="section-title"><h2>Education</h2></div>
-<div class="grid">
-<div>
-<h3>University of Oklahoma</h3>
-<p>M.S. Electrical &amp; Computer Engineering<br>Fall 2025 – Summer 2027<br>CGPA 4.00/4.00</p>
-</div>
-<div>
-<h3>Khulna University of Engineering &amp; Technology</h3>
-<p>B.S. Electrical &amp; Electronic Engineering<br>Feb 2017 – Apr 2022<br>CGPA 3.53/4.00</p>
-</div>
-</div>
+<section id="life">
+<div class="section-title"><h2>Life</h2><p>A bit about who I am outside the lab.</p></div>
+<article class="item">
+<h3><a href="life.html" style="color: #0066cc; text-decoration: none;">Beyond Research</a></h3>
+<p>Favorite books, movies, quotes, and the things I do when I'm not debugging LabVIEW or training models.</p>
+</article>
 </section>
 
 <section id="contact" class="contact">
@@ -235,6 +211,32 @@
 <p>AWS Audit Certification (2023).</p>
 <p>Huawei Seeds for the Future Champion (2022).</p>
 <p>Merit Scholarships, Government National Awards (2014, 2016).</p>
+</div>
+<div>
+<h3>Skills</h3>
+<p><strong>Programming:</strong> Python, MATLAB, C, C++</p>
+<p><strong>Machine Learning / Deep Learning:</strong> PyTorch, TensorFlow, scikit-learn, NumPy</p>
+<p><strong>Signal &amp; Image Processing:</strong> FFT, range/Doppler processing, beamforming, filtering, U-Net, CNNs</p>
+<p><strong>Hardware:</strong> Microcontrollers, Arduino, VHDL, Verilog, PSpice, oscilloscopes, DMM</p>
+<p><strong>Tools:</strong> LabVIEW, Microwind, Autodesk Fusion 360</p>
+</div>
+<div>
+<h3>Leadership</h3>
+<p>Led operations across 7 manufacturing facilities and managed a team of 50 employees.</p>
+</div>
+<div>
+<h3>Activities</h3>
+<p>EEE Makers Hub, KUET — PR Secretary (2020–2022).</p>
+<p>Bangladesh Advanced Robotics Research Center — Volunteer (2020).</p>
+<p>Robo Adda — Video editor producing robotics and programming tutorials (2021–2022).</p>
+</div>
+<div>
+<h3>University of Oklahoma</h3>
+<p>M.S. Electrical &amp; Computer Engineering<br>Fall 2025 – Summer 2027<br>CGPA 4.00/4.00</p>
+</div>
+<div>
+<h3>Khulna University of Engineering &amp; Technology</h3>
+<p>B.S. Electrical &amp; Electronic Engineering<br>Feb 2017 – Apr 2022<br>CGPA 3.53/4.00</p>
 </div>
 </div>
 </section>
