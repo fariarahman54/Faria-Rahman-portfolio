@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CNN-Based Target Classification Using FMCW Radar</title>
+<meta name="description" content="A lightweight CNN classifies pedestrians, cyclists, and cars from CARRADA FMCW radar Range-Doppler maps, beating a hand-crafted SVM baseline by 15.9 points.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wrap">
+    <a class="brand" href="../../index.html#projects">&larr; Faria Rahman &middot; Projects</a>
+    <ul class="navlinks">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#background">Background</a></li>
+      <li><a href="#method">Method</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#findings">Findings</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header id="top" class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Radar Signal Processing &middot; Final Project</span>
+    <h1>CNN&#8211;Based Target Classification Using FMCW Radar Range&#8211;Doppler Maps</h1>
+    <p class="subtitle">
+      A lightweight three-block CNN classifies pedestrians, cyclists, and cars directly from
+      Range-Doppler radar patches &mdash; and outperforms a hand-crafted SVM baseline by
+      15.9 percentage points, showing that learned spatial features beat scalar radar features
+      on this task.
+    </p>
+    <p class="byline"><strong>Faria Rahman</strong> &middot; Dataset: CARRADA &middot; 2026</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="assets/Radar_Final_Project.pdf" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        Read the paper
+      </a>
+      <a class="btn btn-ghost" href="code/radar_cnn_project_executed.ipynb" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Notebook
+      </a>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="num">89.6%</div>
+        <div class="lbl">CNN test accuracy</div>
+      </div>
+      <div class="stat">
+        <div class="num">0.89</div>
+        <div class="lbl">Macro F1-score</div>
+      </div>
+      <div class="stat">
+        <div class="num">+15.9pp</div>
+        <div class="lbl">Over hand-crafted<br>SVM baseline</div>
+      </div>
+      <div class="stat">
+        <div class="num">5,624</div>
+        <div class="lbl">Labeled Range-Doppler<br>patches, 3 classes</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section id="overview">
+    <div class="wrap">
+      <p class="kicker">Overview</p>
+      <h2>Can a CNN out-see hand-crafted radar features?</h2>
+      <p>
+        Autonomous vehicles and driver-assistance systems lean on FMCW radar because it works
+        reliably in rain, fog, and darkness while giving direct velocity information through the
+        Doppler shift. A core perception task is target classification &mdash; deciding whether a
+        detected object is a pedestrian, a cyclist, or a car.
+      </p>
+      <p>
+        Classical approaches rely on hand-crafted radar features such as Doppler centroid, radar
+        cross-section, and spectral spread. But these scalar features may not fully capture the
+        two-dimensional spatial structure of a Range-Doppler (RD) map &mdash; and RD maps resemble
+        images, where local spatial patterns carry meaning. This project implements a lightweight
+        CNN for RD-patch classification and directly compares it against an SVM baseline trained
+        on six hand-crafted features, under identical data splits.
+      </p>
+      <p>
+        On the <strong>CARRADA</strong> automotive radar dataset, the CNN reaches
+        <strong>89.6%</strong> test accuracy and a macro F1-score of <strong>0.89</strong>,
+        beating the SVM's <strong>73.7%</strong> / <strong>0.75</strong> by a wide margin &mdash;
+        evidence that learned spatial features generalize better than scalar hand-crafted ones for
+        this task.
+      </p>
+    </div>
+  </section>
+
+  <section id="background">
+    <div class="wrap">
+      <p class="kicker">Background</p>
+      <h2>FMCW radar, Range-Doppler maps, and the CARRADA dataset</h2>
+      <p>
+        An FMCW radar transmits a linear chirp whose frequency increases from f<sub>0</sub> to
+        f<sub>0</sub>+B over a chirp duration T. The received echo from a target at range R is
+        delayed by:
+      </p>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="name">Time delay</div>
+          <div class="formula">&tau; = 2R / c</div>
+          <p>c is the speed of light. A range FFT along fast-time samples turns this delay into an estimated range.</p>
+        </div>
+        <div class="card">
+          <div class="name">Beat frequency</div>
+          <div class="formula">f<sub>beat</sub> = S&middot;&tau;,&nbsp; S = B/T</div>
+          <p>S is the chirp slope. A second FFT along slow-time chirps estimates Doppler velocity, forming the 2-D Range-Doppler map.</p>
+        </div>
+      </div>
+
+      <figure>
+        <img src="assets/fig1_fmcw_overview.png" alt="FMCW radar signal processing overview: transmitted chirp waveform, simulated Range-Doppler map, and target class positions in RD space" loading="lazy">
+        <figcaption>FMCW radar signal processing overview. Left: transmitted chirp waveform. Center: simulated Range-Doppler map. Right: target class positions in RD space.</figcaption>
+      </figure>
+
+      <h3>CARRADA dataset</h3>
+      <p>
+        CARRADA contains automotive radar data collected with a 77&nbsp;GHz FMCW radar: 30
+        sequences, 12,666 annotated frames, and three object classes &mdash; pedestrian, cyclist,
+        car. Each RD map is 256&times;64, with range resolution 0.195&nbsp;m/bin and Doppler
+        resolution 0.420&nbsp;m/s/bin.
+      </p>
+
+      <figure>
+        <img src="assets/fig3_groundtruthannotations.png" alt="Range-Doppler map with ground-truth bounding-box annotations for car, pedestrian, and cyclist" loading="lazy">
+        <figcaption>Annotated Range-Doppler map: bounding boxes mark which region of the map corresponds to each object, before cropping to fixed-size patches.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="method">
+    <div class="wrap">
+      <p class="kicker">Method</p>
+      <h2>Preprocessing, the CNN, and the SVM baseline</h2>
+
+      <h3>Data preprocessing</h3>
+      <p>
+        Each RD map is loaded on a logarithmic dB scale and normalized with z-scores. Target
+        bounding boxes are expanded by 2 bins to include surrounding clutter context, then each
+        crop is resized to a fixed <code>32&times;32</code> patch &mdash; the CNN's input.
+      </p>
+
+      <h3>Dataset composition</h3>
+      <p>
+        5,624 labeled instances in total: <strong>Pedestrian 1,423 (25.3%)</strong>,
+        <strong>Cyclist 987 (17.5%)</strong>, <strong>Car 3,214 (57.1%)</strong>. The class
+        imbalance (cars are the majority, cyclists the minority) motivates a
+        <strong>70 / 15 / 15</strong> stratified split into train, validation, and test sets so
+        every split keeps the same class proportions as the full dataset.
+      </p>
+
+      <div class="table-wrap" style="margin-bottom:34px;">
+        <figure style="margin:0;">
+          <img src="assets/fig2_classdistribution.png" alt="Bar chart of class distribution in the CARRADA dataset: 1423 pedestrian, 987 cyclist, 3214 car" loading="lazy">
+          <figcaption>Class distribution across the 5,624 labeled instances used in this study.</figcaption>
+        </figure>
+      </div>
+
+      <figure>
+        <img src="assets/fig4_Patchesperclass.png" alt="Sample 32 by 32 Range-Doppler patches for pedestrian, cyclist, and car classes" loading="lazy">
+        <figcaption>Representative 32&times;32 RD patches per class. Car targets appear brighter and more compact; pedestrian signatures are weaker and more spread out.</figcaption>
+      </figure>
+
+      <h3>RadarCNN architecture</h3>
+      <p>
+        Three convolutional blocks, each a <code>3&times;3</code> convolution with batch
+        normalization and ReLU. Max-pooling follows the first two blocks; adaptive average pooling
+        follows the third. Channel sizes go <code>1&#8594;32&#8594;64&#8594;128</code>. A fully
+        connected layer with dropout feeds a final 3-class softmax output.
+        <strong>298,499</strong> trainable parameters in total.
+      </p>
+
+      <figure>
+        <img src="assets/fig5_radarCNN.png" alt="RadarCNN architecture diagram: input, three conv+BN+ReLU blocks with pooling, flatten, fully connected layer with dropout, softmax output" loading="lazy">
+        <figcaption>RadarCNN architecture for Range-Doppler patch classification.</figcaption>
+      </figure>
+
+      <h3>Training protocol</h3>
+      <p>
+        Adam optimizer (<code>lr = 1e-3</code>, weight decay <code>1e-4</code>), cross-entropy
+        loss, batch size 64, 30 epochs. The checkpoint with the best validation accuracy is kept
+        for final testing.
+      </p>
+
+      <h3>SVM baseline</h3>
+      <p>An RBF-kernel SVM trained on the same split, using six hand-crafted features:</p>
+      <ul class="plain">
+        <li>Mean Doppler centroid</li>
+        <li>Peak range bin</li>
+        <li>Doppler spread</li>
+        <li>Mean patch power</li>
+        <li>Peak power</li>
+        <li>Range spread</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="results">
+    <div class="wrap">
+      <p class="kicker">Results</p>
+      <h2>The CNN wins on every class, and by the widest margin on the hardest one</h2>
+
+      <figure>
+        <img src="assets/fig6_lossandAccuracy.png" alt="Training and validation loss and accuracy curves over 30 epochs" loading="lazy">
+        <figcaption>CNN training converges smoothly over 30 epochs; validation accuracy reaches roughly 92%.</figcaption>
+      </figure>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Class</th><th>CNN Prec.</th><th>CNN Rec.</th><th>CNN F1</th><th>SVM Prec.</th><th>SVM Rec.</th><th>SVM F1</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Pedestrian</td><td class="num">0.90</td><td class="num">0.89</td><td class="num">0.89</td><td class="num">0.70</td><td class="num">0.71</td><td class="num">0.70</td></tr>
+            <tr><td>Cyclist</td><td class="num">0.86</td><td class="num">0.79</td><td class="num">0.82</td><td class="num">0.68</td><td class="num">0.60</td><td class="num">0.64</td></tr>
+            <tr><td>Car</td><td class="num">0.94</td><td class="num">0.97</td><td class="num">0.95</td><td class="num">0.90</td><td class="num">0.93</td><td class="num">0.91</td></tr>
+            <tr class="best"><td>Macro Avg</td><td class="num">0.90</td><td class="num">0.88</td><td class="num">0.89</td><td class="num">0.76</td><td class="num">0.75</td><td class="num">0.75</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metric</th><th>CNN Train</th><th>CNN Val</th><th>CNN Test</th><th>SVM Test</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Accuracy</td><td class="num">95.2%</td><td class="num">91.4%</td><td class="num">89.6%</td><td class="num">73.7%</td></tr>
+            <tr><td>Macro F1</td><td class="num">&mdash;</td><td class="num">&mdash;</td><td class="num">0.89</td><td class="num">0.75</td></tr>
+            <tr><td>Parameters</td><td class="num">298,499</td><td class="num">&mdash;</td><td class="num">&mdash;</td><td class="num">6 features</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure>
+        <img src="assets/fig7_CNNconfusionMatrics.png" alt="CNN confusion matrices, raw counts and normalized, for pedestrian, cyclist, and car classes" loading="lazy">
+        <figcaption>CNN confusion matrices. 482 of 496 car samples are correctly classified; the largest confusion is 21 cyclists predicted as cars.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="assets/fig8_SVMmatrics.png" alt="SVM confusion matrices, raw counts and normalized, for pedestrian, cyclist, and car classes" loading="lazy">
+        <figcaption>SVM confusion matrices. 38 cyclist samples are misclassified as pedestrians (versus 16 for the CNN) &mdash; the SVM struggles more to separate similar radar signatures.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="assets/fig9_testsetaccuracy.png" alt="Bar chart comparing CNN and SVM test-set accuracy against a random baseline of 33.3%" loading="lazy">
+        <figcaption>Test accuracy: CNN 89.6% vs. SVM 73.7%, both far above the 33.3% random baseline for three balanced classes.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="findings">
+    <div class="wrap">
+      <p class="kicker">Discussion</p>
+      <h2>Key findings</h2>
+      <div class="findings">
+        <div class="finding">
+          <div class="idx">01</div>
+          <p>CNN filters behave like learnable matched filters on the Range-Doppler map &mdash; similar to classical radar matched filtering, but the kernels are learned rather than hand-derived.</p>
+        </div>
+        <div class="finding">
+          <div class="idx">02</div>
+          <p>Pooling suppresses noise by combining local information while preserving the spatial structure that scalar SVM features discard.</p>
+        </div>
+        <div class="finding">
+          <div class="idx">03</div>
+          <p>Car achieves the highest F1 for both models (0.95 CNN / 0.91 SVM) &mdash; vehicle radar returns are stronger and more spatially compact than pedestrian or cyclist returns.</p>
+        </div>
+        <div class="finding">
+          <div class="idx">04</div>
+          <p>Pedestrian&#8211;cyclist confusion is the dominant error mode for both models: both classes produce weak returns with similar Doppler spread, and the SVM confuses them roughly twice as often as the CNN.</p>
+        </div>
+        <div class="finding">
+          <div class="idx">05</div>
+          <p>Limitations: fixed radar mounting geometry, no temporal information across frames, class imbalance (cars are 57% of samples), and the method assumes clean detection bounding boxes.</p>
+        </div>
+        <div class="finding">
+          <div class="idx">06</div>
+          <p>Future work: temporal models such as LSTMs or 3D CNNs to exploit frame-to-frame motion, radar-specific data augmentation, and integration with CFAR-based detection instead of ground-truth boxes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stack">
+    <div class="wrap">
+      <p class="kicker">Tech Stack</p>
+      <h2>Built with</h2>
+      <div class="chips">
+        <span class="chip">Python</span>
+        <span class="chip">PyTorch</span>
+        <span class="chip">NumPy</span>
+        <span class="chip">Matplotlib</span>
+        <span class="chip">scikit-learn</span>
+        <span class="chip">CARRADA Dataset</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <span>&copy; 2026 Faria Rahman &middot; Radar Signal Processing Final Project</span>
+  <span class="flinks">
+    <a href="../../index.html#projects">&larr; Back to projects</a>
+    <a href="assets/Radar_Final_Project.pdf" target="_blank" rel="noopener">Paper (PDF)</a>
+  </span>
+</footer>
+
+</body>
+</html>
