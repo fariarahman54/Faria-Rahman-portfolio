@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Building an Acoustic Intensity Measurement System</title>
+<meta name="description" content="Building and integrating a hydrophone-based ultrasound pressure-field measurement system at the University of Oklahoma — hardware bring-up, signal-chain verification, and LabVIEW/MATLAB troubleshooting.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔬</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="aims-setup.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wrap">
+    <a class="brand" href="../index.html#research">&larr; Faria Rahman &middot; Research</a>
+    <ul class="navlinks">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#system">System</a></li>
+      <li><a href="#design">Design</a></li>
+      <li><a href="#assembly">Assembly</a></li>
+      <li><a href="#buildlog">Build Log</a></li>
+      <li><a href="#status">Status</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header id="top" class="hero">
+  <div class="wrap">
+    <span class="eyebrow">University of Oklahoma &middot; Research Experience &middot; Completed</span>
+    <h1>Building an Acoustic Intensity Measurement System for Ultrasound Pressure-Field Characterization</h1>
+    <p class="subtitle">
+      Designing and building a hydrophone-based measurement rig into a fully verified acquisition
+      chain: integrating a precision digitizer, a 3-axis motorized stage, and a calibrated
+      hydrophone, then diagnosing and resolving the hardware and software failures standing
+      between an assembled system and one ready to run a measurement.
+    </p>
+    <p class="byline"><strong>Faria Rahman</strong> &middot; Hydrophone-based pressure-field measurement setup &middot; 2026</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#system">System overview</a>
+      <a class="btn btn-ghost" href="#buildlog">Troubleshooting log</a>
+      <a class="btn btn-ghost" href="#status">Current status</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section id="overview">
+    <div class="wrap">
+      <p class="kicker">Overview</p>
+      <h2>Why measure the pressure field at all</h2>
+      <p>
+        Before an ultrasound transducer can be trusted for imaging or therapy research, its actual
+        acoustic output has to be measured, not assumed. An Acoustic Intensity Measurement System
+        (AIMS) does this by scanning a calibrated hydrophone through the beam in a water tank and
+        recording pressure as a function of position, which in turn yields standard safety and
+        performance metrics &mdash; spatial-peak pulse-average intensity (ISPPA), spatial-peak
+        temporal-average intensity (ISPTA), mechanical index (MI), and peak rarefactional pressure.
+      </p>
+      <p>
+        I designed and built this measurement setup: developing the system schematic, integrating
+        the hardware &mdash; transducer, hydrophone, motorized stage, and digitizer &mdash; into a
+        single acquisition chain, and verifying every subsystem along the way, replacing the parts
+        that didn't work until the full chain was ready for an actual measurement campaign.
+      </p>
+      <p>
+        This page documents that process honestly: what was designed, what was built, what was
+        verified, and what broke and how it got fixed. The acquisition chain itself is fully built,
+        integrated, and verified end-to-end; running the hydrophone pressure-field scan itself is
+        future work.
+      </p>
+    </div>
+  </section>
+
+  <section id="system">
+    <div class="wrap">
+      <p class="kicker">System</p>
+      <h2>Hardware stack and signal chain</h2>
+      <p>
+        The measurement chain: a Verasonics Vantage system drives an L11-5v linear array
+        transducer submerged in a water tank; a calibrated hydrophone, mounted on a 3-axis
+        motorized stage on the opposite side of the tank, picks up the resulting pressure wave; the
+        signal is amplified and digitized, and the same Verasonics system provides the trigger so
+        acquisition is synchronized to each transmitted pulse.
+      </p>
+      <ul class="plain">
+        <li><strong>Ultrasound source:</strong> Verasonics Vantage system, L11-5v linear array transducer</li>
+        <li><strong>Hydrophone:</strong> Onda HGL-0085 needle hydrophone with AG-2010 preamplifier</li>
+        <li><strong>Positioning:</strong> Sigma Koki SHOT-304GS 3-axis motorized stage (RS-232C serial control)</li>
+        <li><strong>Digitizer:</strong> GaGe CompuScope CSE123G2-2GS, up to 3 GS/s per channel</li>
+        <li><strong>Control software:</strong> a legacy LabVIEW 2016 (32-bit) VI, plus a MATLAB pipeline built as a more maintainable alternative</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="design">
+    <div class="wrap">
+      <p class="kicker">Design</p>
+      <h2>System schematic and physical setup</h2>
+      <p>
+        The schematic below was designed with reference to prior AIMS hydrophone measurement setups,
+        laying out how each piece of the hardware stack connects end-to-end; the photo alongside it
+        shows the physical setup built by integrating the actual parts to follow that design.
+      </p>
+
+      <div class="findings" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/system-schematic.png" alt="System schematic diagram showing the Vantage 256 driving the transducer in a water tank, the hydrophone signal chain through a preamplifier and DC block into an oscilloscope, the trigger connection between the Vantage and oscilloscope, and the 3D translation stage controlled via LabVIEW" loading="lazy">
+          <figcaption>System schematic: signal and trigger paths between the Vantage 256, transducer, hydrophone signal chain, oscilloscope, and 3-axis translation stage.</figcaption>
+        </figure>
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/photo-setup-overview.jpeg" alt="Photo of the hydrophone measurement tank setup, with the transducer and hydrophone mounted on opposite translation stages and labeled" loading="lazy">
+          <figcaption>The measurement tank: the transducer (left post) and the Onda hydrophone (right post) are each mounted on independently positioned translation stages, facing each other across the water path.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="assembly">
+    <div class="wrap">
+      <p class="kicker">Assembly</p>
+      <h2>Mechanical integration</h2>
+      <p>
+        Getting accurate pressure-field data starts with precise, repeatable alignment. The
+        hydrophone and transducer mounts use ThorLabs micrometer translation stages for fine manual
+        positioning, on top of the SigmaKoki motorized stage that handles the programmed raster
+        scan. Assembling and aligning this hardware &mdash; and understanding exactly how each
+        translation and rotation stage interacts with the others &mdash; was a prerequisite for
+        everything downstream.
+      </p>
+      <div class="findings" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/photo-mount-build-1.jpg" alt="Hand holding a ThorLabs micrometer translation mount above the measurement tank during assembly" loading="lazy">
+        </figure>
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/photo-mount-build-2.jpg" alt="Close-up of the transducer mount assembled onto its micrometer positioning stage" loading="lazy">
+        </figure>
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/photo-mount-build-3.jpg" alt="Close-up of the hydrophone holder assembled onto its micrometer positioning stage next to the tank" loading="lazy">
+        </figure>
+      </div>
+      <p style="margin-top:18px;">
+        The stage geometry turned out to be non-uniform across axes &mdash; different DIVIDE and
+        base-rate settings on the SigmaKoki controller give different physical distances per pulse
+        on each axis &mdash; which had to be worked out from the controller manual before trusting
+        any programmed move.
+      </p>
+    </div>
+  </section>
+
+  <section id="verification">
+    <div class="wrap">
+      <p class="kicker">Verification</p>
+      <h2>Confirming the digitizer independently, before trusting the full chain</h2>
+      <p>
+        Rather than debugging the whole system at once, the GaGe digitizer was verified in
+        isolation first: a bench function generator (Tektronix AFG31000) drove a known 1&nbsp;MHz,
+        50&nbsp;mV<sub>pp</sub> sine wave into a 50&nbsp;&Omega; load, cross-checked live on a
+        Teledyne LeCroy WaveRunner&nbsp;640Zi oscilloscope, and the same signal was fed into the
+        GaGe card and inspected in GageScope &mdash; GaGe's own acquisition-and-display software,
+        which serves the same role here as an oscilloscope on the PC. A clean, matching waveform in
+        GageScope confirmed the digitizer hardware and driver chain were sound before wiring it
+        into the full measurement setup.
+      </p>
+      <div class="findings" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/photo-function-generator.jpg" alt="Tektronix AFG31000 function generator screen showing a 1 MHz sine wave output" loading="lazy">
+          <figcaption>Reference signal: Tektronix AFG31000, 1&nbsp;MHz sine, 50&nbsp;mV<sub>pp</sub>.</figcaption>
+        </figure>
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/photo-oscilloscope.jpg" alt="Teledyne LeCroy WaveRunner oscilloscope screen showing the same sine wave for cross-check" loading="lazy">
+          <figcaption>Cross-check on a Teledyne LeCroy WaveRunner 640Zi oscilloscope.</figcaption>
+        </figure>
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/gagescope-confirmation.png" alt="GageScope software screenshot showing the GaGe digitizer correctly acquiring the same sine waveform" loading="lazy">
+          <figcaption>Same signal, correctly acquired by the GaGe digitizer in GageScope.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="buildlog">
+    <div class="wrap">
+      <p class="kicker">Build Log</p>
+      <h2>Diagnosing and fixing four independent failures</h2>
+      <p>
+        The system was inherited in a non-working state, and each subsystem had its own, unrelated
+        failure. Isolating them &mdash; rather than assuming one root cause &mdash; was most of the
+        work.
+      </p>
+
+      <div class="findings">
+        <div class="finding">
+          <div class="idx">01</div>
+          <p>
+            <strong>LabVIEW VI wouldn't compile &mdash; 34 broken sub-VIs.</strong> The error list
+            traced every failure to <code>ROOT CAUSE: Dependency is broken</code> on the
+            <code>CsLv_*</code> digitizer calls, meaning the GaGe CompuScope driver simply wasn't
+            installed on that machine. A fresh driver install resolved all 34 errors at once.
+          </p>
+        </div>
+        <div class="finding">
+          <div class="idx">02</div>
+          <p>
+            <strong>The 3-axis stage wouldn't move.</strong> Windows had no working driver for the
+            USB-to-serial adapter linking the SigmaKoki motion controller to the PC, so LabVIEW's
+            motion commands went nowhere. Installing the correct driver and confirming a clean COM
+            port in Device Manager fixed it &mdash; then confirmed independently with a MATLAB
+            <code>serialport()</code> connection at 9600&nbsp;baud.
+          </p>
+        </div>
+        <div class="finding">
+          <div class="idx">03</div>
+          <p>
+            <strong>"Invalid segment size" aborted every acquisition.</strong> At first this looked
+            like a LabVIEW bug. It's actually a hardware/firmware memory-granularity constraint on
+            the CompuScope card itself &mdash; reproducible outside LabVIEW too. Sweeping candidate
+            values empirically showed 8,320 samples succeeds where 8,192 fails at a 250&nbsp;MS/s
+            sample rate.
+          </p>
+        </div>
+        <div class="finding">
+          <div class="idx">04</div>
+          <p>
+            <strong>Stage motion units didn't mean what they looked like.</strong> LabVIEW issues
+            moves in micrometers, not motor pulses, and each axis converts those differently
+            depending on its DIVIDE and base-rate settings &mdash; decoded from the SHOT-304GS
+            manual rather than assumed, after finding the stage's resolution isn't uniform across
+            all three axes.
+          </p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:34px;">Before and after: the LabVIEW driver fix</h3>
+      <div class="findings" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/labview-errors-before.png" alt="LabVIEW error list showing 34 errors, all rooted in a broken CsLv digitizer driver dependency" loading="lazy">
+          <figcaption>Before: 34 broken sub-VIs, all tracing back to the missing digitizer driver.</figcaption>
+        </figure>
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/labview-errors-after.png" alt="LabVIEW error list showing zero errors after installing the correct digitizer driver" loading="lazy">
+          <figcaption>After: a fresh CompuScope driver install clears every dependency error.</figcaption>
+        </figure>
+      </div>
+
+      <h3 style="margin-top:34px;">The segment-size error and its fix</h3>
+      <div class="findings" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/labview-segment-error.png" alt="LabVIEW error dialog: System 131083, Invalid segment size, program execution will be aborted" loading="lazy">
+          <figcaption>The failure: CompuScope error 131083, aborting acquisition.</figcaption>
+        </figure>
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/labview-daq-panel.png" alt="LabVIEW data acquisition configuration panel showing sample rate, record length, and segment size fields" loading="lazy">
+          <figcaption>The acquisition configuration panel used to sweep and confirm a valid segment size at a 250&nbsp;MS/s sample rate.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="status">
+    <div class="wrap">
+      <p class="kicker">Status</p>
+      <h2>What's built, and what's next</h2>
+      <div class="card-grid">
+        <div class="card">
+          <div class="name">Verified &amp; working</div>
+          <ul class="plain" style="margin-bottom:0;">
+            <li>GaGe digitizer confirmed acquiring a known signal end-to-end (function generator &rarr; digitizer &rarr; GageScope)</li>
+            <li>3-axis SigmaKoki stage confirmed responsive to programmed moves, both via LabVIEW and independently via MATLAB serial commands</li>
+            <li>LabVIEW control VI runs cleanly with zero dependency errors</li>
+            <li>Transducer and hydrophone mechanically mounted, aligned, and facing each other across the tank</li>
+            <li>A parallel MATLAB pipeline replicating the full LabVIEW pipeline (acquisition, stage control, intensity calculations) built and analytically self-tested</li>
+          </ul>
+        </div>
+        <div class="card best">
+          <div class="name">Future Work</div>
+          <ul class="plain" style="margin-bottom:0;">
+            <li>Load the real Onda hydrophone calibration data into the pipeline</li>
+            <li>Run a single-point capture and sanity-check the waveform before scanning</li>
+            <li>Execute the first full raster scan (paired XZ and YZ 2-D scans, since full 3-D scanning isn't supported on this stage) to map the actual pressure field</li>
+            <li>Compute ISPPA, ISPTA, MI, and peak rarefactional pressure from the scanned data</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stack">
+    <div class="wrap">
+      <p class="kicker">Tools &amp; Skills</p>
+      <h2>Built with</h2>
+      <div class="chips">
+        <span class="chip">LabVIEW</span>
+        <span class="chip">MATLAB</span>
+        <span class="chip">Serial (RS-232) instrument control</span>
+        <span class="chip">GaGe CompuScope SDK</span>
+        <span class="chip">Verasonics Vantage</span>
+        <span class="chip">Precision optomechanical alignment</span>
+        <span class="chip">Hardware/software debugging</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <span>&copy; 2026 Faria Rahman &middot; University of Oklahoma</span>
+  <span class="flinks">
+    <a href="../index.html#research">&larr; Back to research</a>
+  </span>
+</footer>
+
+</body>
+</html>
