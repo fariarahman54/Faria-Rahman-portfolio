@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Building an Acoustic Intensity Measurement System</title>
-<meta name="description" content="Integrating and debugging a hydrophone-based ultrasound pressure-field measurement system at the Yoon Lab, University of Oklahoma — hardware bring-up, signal-chain verification, and LabVIEW/MATLAB troubleshooting.">
+<meta name="description" content="Building and integrating a hydrophone-based ultrasound pressure-field measurement system at the University of Oklahoma — hardware bring-up, signal-chain verification, and LabVIEW/MATLAB troubleshooting.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔬</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,6 +19,7 @@
     <ul class="navlinks">
       <li><a href="#overview">Overview</a></li>
       <li><a href="#system">System</a></li>
+      <li><a href="#design">Design</a></li>
       <li><a href="#assembly">Assembly</a></li>
       <li><a href="#buildlog">Build Log</a></li>
       <li><a href="#status">Status</a></li>
@@ -28,38 +29,19 @@
 
 <header id="top" class="hero">
   <div class="wrap">
-    <span class="eyebrow">Yoon Lab, University of Oklahoma &middot; Research Experience &middot; Ongoing</span>
+    <span class="eyebrow">University of Oklahoma &middot; Research Experience &middot; Completed</span>
     <h1>Building an Acoustic Intensity Measurement System for Ultrasound Pressure-Field Characterization</h1>
     <p class="subtitle">
-      Bringing a hydrophone-based measurement rig from an inherited, non-functional state to a
-      fully verified acquisition chain: integrating a precision digitizer, a 3-axis motorized
-      stage, and a calibrated hydrophone, then diagnosing and resolving the hardware and software
-      failures standing between the lab and its first pressure-field scan.
+      Designing and building a hydrophone-based measurement rig into a fully verified acquisition
+      chain: integrating a precision digitizer, a 3-axis motorized stage, and a calibrated
+      hydrophone, then diagnosing and resolving the hardware and software failures standing
+      between an assembled system and one ready to run a measurement.
     </p>
     <p class="byline"><strong>Faria Rahman</strong> &middot; Hydrophone-based pressure-field measurement setup &middot; 2026</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="#system">System overview</a>
       <a class="btn btn-ghost" href="#buildlog">Troubleshooting log</a>
       <a class="btn btn-ghost" href="#status">Current status</a>
-    </div>
-
-    <div class="stats">
-      <div class="stat">
-        <div class="num">5</div>
-        <div class="lbl">Hardware &amp; software subsystems integrated</div>
-      </div>
-      <div class="stat">
-        <div class="num">4</div>
-        <div class="lbl">Distinct failure modes root-caused and fixed</div>
-      </div>
-      <div class="stat">
-        <div class="num">250 MS/s</div>
-        <div class="lbl">Digitizer acquisition verified end-to-end</div>
-      </div>
-      <div class="stat">
-        <div class="num">In progress</div>
-        <div class="lbl">Full pressure-field raster scan (next milestone)</div>
-      </div>
     </div>
   </div>
 </header>
@@ -79,16 +61,16 @@
         temporal-average intensity (ISPTA), mechanical index (MI), and peak rarefactional pressure.
       </p>
       <p>
-        This particular AIMS rig at the Yoon Lab was originally built by Dr. Changyang Lee. My role
-        has been to bring it back online: verify every subsystem still works, replace the parts
-        that don't, and get the full acquisition chain &mdash; transducer, hydrophone, motorized
-        stage, and digitizer &mdash; ready for an actual measurement campaign.
+        I designed and built this measurement setup: developing the system schematic, integrating
+        the hardware &mdash; transducer, hydrophone, motorized stage, and digitizer &mdash; into a
+        single acquisition chain, and verifying every subsystem along the way, replacing the parts
+        that didn't work until the full chain was ready for an actual measurement campaign.
       </p>
       <p>
-        This page documents that process honestly: what's built, what's verified, what broke and
-        how it got fixed, and what's still ahead. The hydrophone pressure-field scan itself has not
-        been run yet &mdash; the work so far has been getting every piece of the chain in a state
-        where that scan is finally possible.
+        This page documents that process honestly: what was designed, what was built, what was
+        verified, and what broke and how it got fixed. The acquisition chain itself is fully built,
+        integrated, and verified end-to-end; running the hydrophone pressure-field scan itself is
+        future work.
       </p>
     </div>
   </section>
@@ -111,11 +93,29 @@
         <li><strong>Digitizer:</strong> GaGe CompuScope CSE123G2-2GS, up to 3 GS/s per channel</li>
         <li><strong>Control software:</strong> a legacy LabVIEW 2016 (32-bit) VI, plus a MATLAB pipeline built as a more maintainable alternative</li>
       </ul>
+    </div>
+  </section>
 
-      <figure>
-        <img src="aims-setup-assets/photo-setup-overview.jpeg" alt="Photo of the hydrophone measurement tank setup, with the transducer and hydrophone mounted on opposite translation stages and labeled" loading="lazy">
-        <figcaption>The measurement tank: the transducer (left post) and the Onda hydrophone (right post) are each mounted on independently positioned translation stages, facing each other across the water path.</figcaption>
-      </figure>
+  <section id="design">
+    <div class="wrap">
+      <p class="kicker">Design</p>
+      <h2>System schematic and physical setup</h2>
+      <p>
+        The schematic below was designed with reference to prior AIMS hydrophone measurement setups,
+        laying out how each piece of the hardware stack connects end-to-end; the photo alongside it
+        shows the physical setup built by integrating the actual parts to follow that design.
+      </p>
+
+      <div class="findings" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/system-schematic.png" alt="System schematic diagram showing the Vantage 256 driving the transducer in a water tank, the hydrophone signal chain through a preamplifier and DC block into an oscilloscope, the trigger connection between the Vantage and oscilloscope, and the 3D translation stage controlled via LabVIEW" loading="lazy">
+          <figcaption>System schematic: signal and trigger paths between the Vantage 256, transducer, hydrophone signal chain, oscilloscope, and 3-axis translation stage.</figcaption>
+        </figure>
+        <figure style="margin:0;">
+          <img src="aims-setup-assets/photo-setup-overview.jpeg" alt="Photo of the hydrophone measurement tank setup, with the transducer and hydrophone mounted on opposite translation stages and labeled" loading="lazy">
+          <figcaption>The measurement tank: the transducer (left post) and the Onda hydrophone (right post) are each mounted on independently positioned translation stages, facing each other across the water path.</figcaption>
+        </figure>
+      </div>
     </div>
   </section>
 
@@ -145,8 +145,8 @@
       <p style="margin-top:18px;">
         The stage geometry turned out to be non-uniform across axes &mdash; different DIVIDE and
         base-rate settings on the SigmaKoki controller give different physical distances per pulse
-        on each axis &mdash; which had to be worked out from the controller manual and cross-checked
-        against Dr. Lee's original configuration before trusting any programmed move.
+        on each axis &mdash; which had to be worked out from the controller manual before trusting
+        any programmed move.
       </p>
     </div>
   </section>
@@ -263,7 +263,7 @@
   <section id="status">
     <div class="wrap">
       <p class="kicker">Status</p>
-      <h2>What's working, and what's still ahead</h2>
+      <h2>What's built, and what's next</h2>
       <div class="card-grid">
         <div class="card">
           <div class="name">Verified &amp; working</div>
@@ -276,7 +276,7 @@
           </ul>
         </div>
         <div class="card best">
-          <div class="name">Next milestone <span class="pill">Not yet done</span></div>
+          <div class="name">Future Work</div>
           <ul class="plain" style="margin-bottom:0;">
             <li>Load the real Onda hydrophone calibration data into the pipeline</li>
             <li>Run a single-point capture and sanity-check the waveform before scanning</li>
@@ -307,7 +307,7 @@
 </main>
 
 <footer class="wrap">
-  <span>&copy; 2026 Faria Rahman &middot; Yoon Lab, University of Oklahoma</span>
+  <span>&copy; 2026 Faria Rahman &middot; University of Oklahoma</span>
   <span class="flinks">
     <a href="../index.html#research">&larr; Back to research</a>
   </span>
