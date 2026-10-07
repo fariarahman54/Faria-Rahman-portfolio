@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta name="description"
+      content="Golay coded excitation for plane-wave ultrasound imaging on a Verasonics Vantage system — implementation, pulse-compression decoding, and SNR and resolution evaluation on a wire phantom.">
+
+<title>Golay Coded Excitation | Faria Rahman</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Libre+Baskerville:wght@400;700&display=swap"
+      rel="stylesheet">
+
+<link rel="stylesheet" href="../style.css">
+
+<style>
+
+/* =====================================================
+   PROJECT PAGE
+   ===================================================== */
+
+.project-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 3rem 0 5rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+.project-header {
+  margin-bottom: 2.5rem;
+}
+
+.project-header h1 {
+  font-family: "Libre Baskerville", Georgia, serif;
+  font-size: 2.35rem;
+  line-height: 1.25;
+  margin-bottom: 0.8rem;
+}
+
+.project-header .meta {
+  color: #777;
+  font-size: 1rem;
+}
+
+.project-header .tags {
+  margin-top: 1rem;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.project-section {
+  margin-top: 2.8rem;
+}
+
+.project-section h2 {
+  font-family: "Libre Baskerville", Georgia, serif;
+  font-size: 1.55rem;
+  margin-bottom: 1rem;
+}
+
+.project-section h3 {
+  font-size: 1.15rem;
+  margin-top: 1.7rem;
+  margin-bottom: 0.5rem;
+}
+
+.project-section p {
+  line-height: 1.75;
+  margin-bottom: 1rem;
+}
+
+.project-section ul {
+  line-height: 1.75;
+  padding-left: 1.4rem;
+}
+
+/* =====================================================
+   IMAGES
+   ===================================================== */
+
+.project-image {
+  width: 100%;
+  max-width: 950px;
+  display: block;
+  margin: 1.5rem auto 0.6rem;
+  border: 1px solid #ddd;
+}
+
+.medium-image {
+  width: 100%;
+  max-width: 560px;
+  display: block;
+  margin: 1.5rem auto 0.6rem;
+  border: 1px solid #ddd;
+}
+
+/* Two-up comparison (without vs with Golay, etc.) */
+
+.pair-grid {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+
+.pair-item {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.pair-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid #ddd;
+}
+
+.pair-item .figure-title {
+  font-size: 0.95rem;
+  margin-top: 0.6rem;
+  margin-bottom: 0;
+}
+
+/* =====================================================
+   FIGURE CAPTIONS
+   ===================================================== */
+
+.figure-title {
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-top: 0.8rem;
+  margin-bottom: 0.25rem;
+  color: #111;
+}
+
+.figure-caption {
+  text-align: center;
+  color: #777;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-top: 0.6rem;
+  margin-bottom: 2rem;
+}
+
+/* =====================================================
+   PROCESSING PIPELINE DIAGRAM
+   ===================================================== */
+
+.pipeline {
+  margin: 1.8rem 0 0.6rem;
+  font-size: 0.92rem;
+}
+
+.pipeline-branches {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.pipeline-branch {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pipeline-step {
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ccc;
+  background: #f7f7f7;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.pipeline-step.key {
+  border-color: #0066cc;
+  background: #f7f9fc;
+}
+
+.pipeline-step.wide {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.pipeline-arrow {
+  text-align: center;
+  color: #999;
+  line-height: 1;
+  padding: 0.3rem 0;
+}
+
+.pipeline-branch-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #0066cc;
+}
+
+/* =====================================================
+   EQUATION / CODE BLOCK
+   ===================================================== */
+
+.equation {
+  margin: 1.2rem 0;
+  padding: 0.9rem 1.2rem;
+  background: #f7f7f7;
+  border: 1px solid #e3e3e3;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.05rem;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* =====================================================
+   RESULTS TABLE
+   ===================================================== */
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.result-table th,
+.result-table td {
+  border: 1px solid #ccc;
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.result-table th {
+  font-weight: 600;
+  background: #f7f7f7;
+}
+
+/* =====================================================
+   HIGHLIGHTED RESULT
+   ===================================================== */
+
+.result-highlight {
+  margin: 1.5rem 0;
+  padding: 1.2rem 1.4rem;
+  border-left: 4px solid #0066cc;
+  background: #f7f9fc;
+  line-height: 1.7;
+}
+
+/* =====================================================
+   TOOLS & REFERENCES
+   ===================================================== */
+
+.tools {
+  color: #555;
+  line-height: 1.8;
+}
+
+.references li {
+  margin-bottom: 0.6rem;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 700px) {
+
+  .project-page {
+    padding: 2rem 1rem 4rem;
+  }
+
+  .project-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .result-table {
+    font-size: 0.9rem;
+  }
+
+  .pair-grid,
+  .pipeline-branches {
+    flex-direction: column;
+  }
+
+  .pair-item {
+    width: 100%;
+  }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="../index.html">Faria Rahman</a>
+    <nav>
+      <a href="../index.html#about">About</a>
+      <a href="../index.html#research">Research</a>
+      <a href="../index.html#projects">Projects</a>
+      <a href="../index.html#experience">Professional Experience</a>
+      <a href="../life.html">Life</a>
+      <a href="../index.html#contact">Contact</a>
+      <a href="../index.html#miscellaneous">Miscellaneous</a>
+    </nav>
+  </div>
+</header>
+
+<main class="project-page">
+
+<!-- =====================================================
+     BACK LINK
+     ===================================================== -->
+
+<a class="back-link" href="../index.html#research">← Back to Research</a>
+
+<!-- =====================================================
+     PROJECT TITLE
+     ===================================================== -->
+
+<section class="project-header">
+
+  <h1>Golay Coded Excitation for Plane-Wave Ultrasound Imaging</h1>
+
+  <div class="meta">University of Oklahoma · Graduate Research</div>
+
+  <div class="tags">
+    Ultrasound Imaging · Coded Excitation · Golay Complementary Codes ·
+    Pulse Compression · Plane-Wave Imaging · Verasonics Vantage
+  </div>
+
+</section>
+
+<!-- =====================================================
+     OVERVIEW
+     ===================================================== -->
+
+<section class="project-section">
+
+  <h2>Overview</h2>
+
+  <p>
+    Conventional ultrasound imaging transmits a short pulse. A short pulse gives
+    good axial resolution, but it carries limited energy, so the signal-to-noise
+    ratio (SNR) falls off quickly with depth. Coded excitation addresses this by
+    transmitting a longer, coded waveform and then compressing the received echo
+    back into a short pulse on receive.
+  </p>
+
+  <p>
+    I implemented <strong>Golay complementary coded excitation</strong> on a
+    Verasonics Vantage ultrasound research system for multi-angle plane-wave
+    imaging. I then evaluated it against conventional short-pulse excitation on
+    a 50&nbsp;μm wire phantom, comparing point intensity, sidelobe level, SNR at
+    two depths, and axial and lateral resolution.
+  </p>
+
+
+</section>
+
+<!-- =====================================================
+     OBJECTIVE
+     ===================================================== -->
+
+<section class="project-section">
+
+  <h2>Objective</h2>
+
+  <p>
+    The objective was to implement Golay coded excitation end to end on the
+    Vantage system, covering arbitrary transmit waveforms, paired acquisitions,
+    and pulse-compression decoding. A second objective was to quantify whether it
+    improves SNR without degrading spatial resolution, compared with
+    conventional short-pulse plane-wave imaging.
+  </p>
+
+</section>
+
+<!-- =====================================================
+     BACKGROUND
+     ===================================================== -->
+
+<section class="project-section">
+
+  <h2>Background: Golay Complementary Codes</h2>
+
+  <p>
+    A Golay pair is two binary (±1) sequences, <em>A</em> and <em>B</em>, of equal
+    length <em>N</em>. Each code's autocorrelation alone has range sidelobes.
+    However, the sidelobes of <em>A</em> and <em>B</em> have equal magnitude and
+    opposite sign. When the two compressed signals are added, the sidelobes cancel
+    and only a single peak of height 2<em>N</em> remains:
+  </p>
+
+  <div class="equation">
+    R<sub>A</sub>(k) + R<sub>B</sub>(k) = 2N · δ(k)
+  </div>
+
+  <p>
+    In imaging, this means two transmissions are needed for each line or angle:
+    one with code <em>A</em> and one with code <em>B</em>. Each received echo is
+    matched-filtered with its own code, and the two results are summed. In theory,
+    the gain in SNR from a length-<em>N</em> Golay pair is
+    10·log<sub>10</sub>(2<em>N</em>) dB at the same peak transmit voltage. The
+    trade-off is that frame rate is halved, and any tissue motion between the
+    <em>A</em> and <em>B</em> transmissions weakens the sidelobe cancellation.
+  </p>
+
+</section>
+
+<!-- =====================================================
+     APPROACH
+     ===================================================== -->
+
+<section class="project-section">
+
+  <h2>Approach</h2>
+
+  <h3>1. Paired Coded Transmissions</h3>
+
+  <p>
+    For each plane-wave steering angle, two transmit events were defined: one with
+    Golay code <em>A</em> and one with Golay code <em>B</em>. The coded waveforms
+    were built as arbitrary transmit waveforms on the Vantage system
+    (<code>TW.type = 'States'</code>), and the RF data from each pair was received
+    and stored separately (RF<sub>A</sub>, RF<sub>B</sub>).
+  </p>
+
+  <h3>2. Pulse Compression and Decoding</h3>
+
+  <p>
+    Each received RF signal was correlated with its matching code (matched
+    filtering). The two compressed signals were then summed, which gives a clean,
+    short-pulse-equivalent RF signal in which the range sidelobes cancel.
+  </p>
+
+  <h3>3. Beamforming and Image Formation</h3>
+
+  <p>
+    The decoded RF data was beamformed into B-mode images using the multi-angle
+    plane-wave workflow. Matching short-pulse acquisitions were reconstructed the
+    same way to serve as the baseline.
+  </p>
+
+  <!-- Processing pipeline diagram -->
+
+  <div class="pipeline" aria-label="Golay coded excitation processing chain">
+
+    <div class="pipeline-branches">
+
+      <div class="pipeline-branch">
+        <div class="pipeline-branch-label">Code A</div>
+        <div class="pipeline-step">Raw RF A</div>
+        <div class="pipeline-arrow">↓</div>
+        <div class="pipeline-step">Matched filter A</div>
+        <div class="pipeline-arrow">↓</div>
+        <div class="pipeline-step">Compressed signal A</div>
+      </div>
+
+      <div class="pipeline-branch">
+        <div class="pipeline-branch-label">Code B</div>
+        <div class="pipeline-step">Raw RF B</div>
+        <div class="pipeline-arrow">↓</div>
+        <div class="pipeline-step">Matched filter B</div>
+        <div class="pipeline-arrow">↓</div>
+        <div class="pipeline-step">Compressed signal B</div>
+      </div>
+
+    </div>
+
+    <div class="pipeline-arrow">↓</div>
+    <div class="pipeline-step wide key">
+      Compressed A + Compressed B → clean, compressed, short-pulse RF data
+    </div>
+    <div class="pipeline-arrow">↓</div>
+    <div class="pipeline-step wide">Beamforming and image formation</div>
+
+  </div>
+
+  <div class="figure-caption">
+    Golay coded excitation processing chain, applied for each plane-wave angle.
+  </div>
+
+  <h3>4. Quantitative Evaluation</h3>
+
+  <p>
+    The Golay and short-pulse images were compared using peak point-target
+    intensity, mainlobe-to-sidelobe level, SNR measured from signal and noise
+    regions at two depths, and axial and lateral point-spread-function (PSF)
+    profiles measured as FWHM at −6&nbsp;dB.
+  </p>
+
+</section>
+
+<!-- =====================================================
+     CHALLENGE: DECODING
+     ===================================================== -->
+
+<section class="project-section">
+
+  <h2>Challenge: Mismatched Transmit and Receive Sampling</h2>
+
+  <p>
+    My first decoding attempt correlated the received RF data directly with the
+    acoustic transmit waveform. This did not work. The Vantage defines transmit
+    waveforms on a <strong>250&nbsp;MHz</strong> grid, but the receive data was
+    sampled at <strong>31.25&nbsp;MHz</strong>. The two signals were on different
+    time grids, so the correlation did not compress the echo.
+  </p>
+
+  <p>
+    To fix this, I converted the Golay ±1 bits into an impulse code sampled at
+    the <em>receive</em> rate. Each chip (+1 or −1) became a single impulse,
+    placed exactly where that chip begins in the received signal, and the code
+    was zero-padded to the RF signal length. Sliding this impulse pattern across
+    the RF data (correlation) produced a sharp correlation peak, which is the
+    expected pulse-compressed output.
+  </p>
+
+  <div class="pair-grid">
+
+    <div class="pair-item">
+      <img src="golay-assets/decoding-before.png"
+           alt="RF A, RF B and decoded A+B signals before the fix, showing no pulse compression">
+      <div class="figure-title">Before: correlation with the transmit waveform</div>
+    </div>
+
+    <div class="pair-item">
+      <img src="golay-assets/decoding-after.png"
+           alt="Raw RF Golay A, Raw RF Golay B, and post-processed RF showing a single compressed peak">
+      <div class="figure-title">After: receive-rate impulse code</div>
+    </div>
+
+  </div>
+
+  <div class="figure-caption">
+    Before the fix, the decoded A+B signal still spans the full code length.
+    After the fix, the post-processed RF collapses to a single compressed peak.
+  </div>
+
+</section>
+
+<!-- =====================================================
+     EXPERIMENTAL SETUP
+     ===================================================== -->
+
+<section class="project-section">
+
+  <h2>Experimental Setup</h2>
+
+  <p>
+    I built a wire phantom using a <strong>50&nbsp;μm diameter wire</strong>,
+    which is about one quarter of the transducer wavelength. The linear-array
+    transducer has a center frequency of <strong>7.6&nbsp;MHz</strong>, which
+    gives a wavelength of about <strong>0.2&nbsp;mm</strong>. At this size the
+    wire acts as a point scatterer, so it can be used to measure the system's
+    point-spread function.
+  </p>
+
+  <img src="golay-assets/wire-phantom.jpg"
+       alt="50 micrometer wire phantom mounted in a water tank"
+       class="medium-image">
+
+  <div class="figure-title">Wire Phantom</div>
+  <div class="figure-caption">50&nbsp;μm wire phantom used for all Golay vs short-pulse measurements.</div>
+
+</section>
+
+<!-- =====================================================
+     RESULTS
+     ===================================================== -->
+
+<section class="project-section">
+
+  <h2>Results</h2>
+
+  <!-- ---------- Image comparison ---------- -->
+
+  <h3>B-Mode Comparison and Point Intensity</h3>
+
+  <p>
+    Both acquisitions show the wire targets clearly. With Golay coding, the
+    point target is brighter: its peak pixel intensity reached
+    <strong>255</strong>, compared with <strong>205</strong> without Golay
+    coding.
+  </p>
+
+  <div class="pair-grid">
+
+    <div class="pair-item">
+      <img src="golay-assets/bmode-without-golay.png"
+           alt="B-mode image of the wire phantom without Golay coded excitation">
+      <div class="figure-title">Without Golay code</div>
+    </div>
+
+    <div class="pair-item">
+      <img src="golay-assets/bmode-with-golay.png"
+           alt="B-mode image of the wire phantom with Golay coded excitation">
+      <div class="figure-title">With Golay code</div>
+    </div>
+
+  </div>
+
+  <div class="pair-grid">
+
+    <div class="pair-item">
+      <img src="golay-assets/zoom-without-golay.png"
+           alt="Zoomed point target without Golay coding, peak intensity 205">
+      <div class="figure-title">Zoomed target: intensity 205</div>
+    </div>
+
+    <div class="pair-item">
+      <img src="golay-assets/zoom-with-golay.png"
+           alt="Zoomed point target with Golay coding, peak intensity 255">
+      <div class="figure-title">Zoomed target: intensity 255</div>
+    </div>
+
+  </div>
+
+  <div class="figure-caption">
+    Wire-phantom B-mode images (top) and zoomed views of the same point target
+    (bottom), showing the higher peak intensity with Golay coded excitation.
+  </div>
+
+  <!-- ---------- Sidelobes ---------- -->
+
+  <h3>Mainlobe and Sidelobe Analysis</h3>
+
+  <p>
+    The envelope of a single RF line through the target was used to estimate SNR
+    and the maximum sidelobe level. With Golay coding, the estimated SNR rose from
+    <strong>91.50&nbsp;dB</strong> to <strong>105.85&nbsp;dB</strong>. The
+    maximum sidelobe level stayed close to the short-pulse case, at
+    <strong>−23.4&nbsp;dB</strong> vs <strong>−22.7&nbsp;dB</strong>.
+  </p>
+
+  <div class="pair-grid">
+
+    <div class="pair-item">
+      <img src="golay-assets/sidelobe-without-golay.png"
+           alt="Mainlobe and sidelobe envelope without Golay coding: estimated SNR 91.50 dB, max sidelobe level -22.71 dB">
+      <div class="figure-title">Without Golay: SNR 91.50 dB</div>
+    </div>
+
+    <div class="pair-item">
+      <img src="golay-assets/sidelobe-with-golay.png"
+           alt="Mainlobe and sidelobe envelope with Golay coding: estimated SNR 105.85 dB, max sidelobe level -23.41 dB">
+      <div class="figure-title">With Golay: SNR 105.85 dB</div>
+    </div>
+
+  </div>
+
+  <div class="figure-caption">
+    Normalized envelope (dB) of the RF line through the point target, showing
+    the mainlobe peak and the maximum sidelobe level.
+  </div>
+
+  <!-- ---------- SNR ---------- -->
+
+  <h3>SNR vs Depth</h3>
+
+  <p>
+    SNR was measured at two point targets at different depths. At each target, a
+    signal region was placed on the target and a noise region was placed
+    directly next to it. Golay coded excitation gave higher SNR at both depths.
+    The gain was larger at the shallower target in this measurement.
+  </p>
+
+  <div class="pair-grid">
+
+    <div class="pair-item">
+      <img src="golay-assets/snr-regions.png"
+           alt="Signal and noise regions selected around a point target for SNR measurement">
+      <div class="figure-title">Signal and noise regions</div>
+    </div>
+
+    <div class="pair-item">
+      <img src="golay-assets/snr-vs-depth.png"
+           alt="SNR versus depth plot: Golay coded excitation is higher than short pulse at both depths">
+      <div class="figure-title">SNR vs depth</div>
+    </div>
+
+  </div>
+
+  <div class="table-wrap">
+    <table class="result-table">
+      <thead>
+        <tr>
+          <th>Depth</th>
+          <th>Golay Coded Excitation</th>
+          <th>Without Golay (Short Pulse)</th>
+          <th>Improvement</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>37 mm</td>
+          <td><strong>22.25 dB</strong></td>
+          <td>20.37 dB</td>
+          <td>+1.88 dB</td>
+        </tr>
+        <tr>
+          <td>32 mm</td>
+          <td><strong>14.78 dB</strong></td>
+          <td>11.62 dB</td>
+          <td>+3.16 dB</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ---------- Resolution ---------- -->
+
+  <h3>Spatial Resolution</h3>
+
+  <p>
+    Axial and lateral PSF profiles were extracted through a point scatterer at
+    about 145&nbsp;λ depth. Resolution was measured as the FWHM at the −6&nbsp;dB
+    level.
+  </p>
+
+  <div class="pair-grid">
+
+    <div class="pair-item">
+      <img src="golay-assets/axial-psf-golay.png"
+           alt="Axial PSF profile with Golay coding, FWHM 0.193 mm (0.951 lambda)">
+      <div class="figure-title">Axial PSF, Golay: 193 μm</div>
+    </div>
+
+    <div class="pair-item">
+      <img src="golay-assets/axial-psf-short-pulse.png"
+           alt="Axial PSF profile without Golay coding, FWHM 0.213 mm (1.054 lambda)">
+      <div class="figure-title">Axial PSF, short pulse: 213 μm</div>
+    </div>
+
+  </div>
+
+  <div class="pair-grid">
+
+    <div class="pair-item">
+      <img src="golay-assets/lateral-psf-golay.png"
+           alt="Lateral PSF profile with Golay coding, FWHM 0.312 mm (1.538 lambda)">
+      <div class="figure-title">Lateral PSF, Golay: 312 μm</div>
+    </div>
+
+    <div class="pair-item">
+      <img src="golay-assets/lateral-psf-short-pulse.png"
+           alt="Lateral PSF profile without Golay coding, FWHM 0.305 mm (1.506 lambda)">
+      <div class="figure-title">Lateral PSF, short pulse: 305 μm</div>
+    </div>
+
+  </div>
+
+  <div class="figure-caption">
+    Normalized axial (top) and lateral (bottom) PSF profiles. The dashed red line
+    marks the −6&nbsp;dB level used for FWHM.
+  </div>
+
+  <div class="table-wrap">
+    <table class="result-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Golay Coded Excitation</th>
+          <th>Without Golay (Short Pulse)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Axial FWHM</td>
+          <td><strong>193 μm</strong> (0.95 λ)</td>
+          <td>213 μm (1.05 λ)</td>
+        </tr>
+        <tr>
+          <td>Lateral FWHM</td>
+          <td>312 μm (1.54 λ)</td>
+          <td><strong>305 μm</strong> (1.51 λ)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="result-highlight">
+    <strong>Summary:</strong> On the wire phantom, Golay coded excitation raised
+    SNR by about <strong>1.9–3.2&nbsp;dB</strong> at the two measured depths and
+    made the axial PSF about <strong>10% narrower</strong> (193&nbsp;μm vs
+    213&nbsp;μm). Lateral resolution was nearly unchanged (312&nbsp;μm vs
+    305&nbsp;μm), which is expected: lateral resolution is set mainly by the
+    aperture and beamforming, not by the transmit code.
+  </div>
+
+</section>
+
+<!-- =====================================================
+     WHAT I LEARNED
+     ===================================================== -->
+
+<section class="project-section">
+
+  <h2>What I Learned</h2>
+
+  <ul>
+    <li>
+      How to define arbitrary transmit waveforms on the Verasonics Vantage
+      using <code>TW.type = 'States'</code>.
+    </li>
+    <li>
+      How multiple coded transmit waveforms are sequenced, transmitted, and
+      received within a single acquisition.
+    </li>
+    <li>
+      How pulse compression and complementary-code decoding work in practice.
+    </li>
+    <li>
+      How the Vantage's transmit sampling rate (250&nbsp;MHz) differs from its
+      receive sampling rate (31.25&nbsp;MHz), and why this matters for
+      matched filtering.
+    </li>
+  </ul>
+
+</section>
+
+<!-- =====================================================
+     MY CONTRIBUTION
+     ===================================================== -->
+
+<section class="project-section">
+
+  <h2>My Contribution</h2>
+
+  <ul>
+    <li>Implemented Golay A/B coded transmit waveforms for multi-angle plane-wave imaging on a Verasonics Vantage system.</li>
+    <li>Built the receive-side pulse-compression and complementary decoding pipeline in MATLAB.</li>
+    <li>Diagnosed the transmit/receive sampling-rate mismatch and designed a receive-rate impulse-code correlation to fix the decoding.</li>
+    <li>Built a 50&nbsp;μm wire phantom for point-spread-function measurements.</li>
+    <li>Acquired matched Golay and short-pulse datasets and reconstructed B-mode images.</li>
+    <li>Quantified point intensity, sidelobe level, SNR vs depth, and axial and lateral FWHM.</li>
+  </ul>
+
+</section>
+
+<!-- =====================================================
+     NEXT STEPS
+     ===================================================== -->
+
+<section class="project-section">
+
+  <h2>Next Steps</h2>
+
+  <p>
+    The next step is <strong>Hadamard encoding</strong> across plane-wave
+    angles, which allows faster multi-angle acquisition. After that, the plan is
+    to combine Hadamard and Golay encoding, so that the SNR gain from Golay coding
+    can be kept without the frame-rate cost of paired transmissions.
+  </p>
+
+</section>
+
+<!-- =====================================================
+     TOOLS
+     ===================================================== -->
+
+<section class="project-section">
+
+  <h2>Tools &amp; Technologies</h2>
+
+  <p class="tools">
+    MATLAB · Verasonics Vantage · Coded Excitation · Golay Complementary Codes ·
+    Pulse Compression · Matched Filtering · Plane-Wave Beamforming ·
+    Signal Processing · Phantom Imaging
+  </p>
+
+</section>
+
+<!-- =====================================================
+     REFERENCES
+     ===================================================== -->
+
+<section class="project-section">
+
+  <h2>References</h2>
+
+  <ol class="references">
+    <li>
+      A. Nowicki, M. Lewandowski, W. Secomski, J. Litniewski, R. Tymkiewicz,
+      "High Frequency Imaging Using Coded Golay Transmission,"
+      <em>IEEE Ultrasonics Symposium</em>, 2005.
+    </li>
+    <li>
+      X. Wang, J. Yang, J. Ji, Y. Zhang, S. Zhou,
+      "Research on Golay-coded excitation in real-time imaging of high frequency
+      ultrasound biomicroscopy," <em>Scientific Reports</em>, 11, 1848, 2021.
+      <a href="https://doi.org/10.1038/s41598-020-80406-x" target="_blank" rel="noopener noreferrer">doi:10.1038/s41598-020-80406-x</a>
+    </li>
+  </ol>
+
+</section>
+
+</main>
+
+<footer>
+  © 2026 Faria Rahman · Electrical &amp; Computer Engineering · University of Oklahoma
+</footer>
+
+<script src="../script.js"></script>
+
+</body>
+</html>
