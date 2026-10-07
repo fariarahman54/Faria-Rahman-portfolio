@@ -641,39 +641,7 @@
     (bottom), showing the higher peak intensity with Golay coded excitation.
   </div>
 
-  <!-- ---------- Sidelobes ---------- -->
-
-  <h3>Mainlobe and Sidelobe Analysis</h3>
-
-  <p>
-    The envelope of a single RF line through the target was used to estimate SNR
-    and the maximum sidelobe level. With Golay coding, the estimated SNR rose from
-    <strong>91.50&nbsp;dB</strong> to <strong>105.85&nbsp;dB</strong>. The
-    maximum sidelobe level stayed close to the short-pulse case, at
-    <strong>−23.4&nbsp;dB</strong> vs <strong>−22.7&nbsp;dB</strong>.
-  </p>
-
-  <div class="pair-grid">
-
-    <div class="pair-item">
-      <img src="golay-assets/sidelobe-without-golay.png"
-           alt="Mainlobe and sidelobe envelope without Golay coding: estimated SNR 91.50 dB, max sidelobe level -22.71 dB">
-      <div class="figure-title">Without Golay: SNR 91.50 dB</div>
-    </div>
-
-    <div class="pair-item">
-      <img src="golay-assets/sidelobe-with-golay.png"
-           alt="Mainlobe and sidelobe envelope with Golay coding: estimated SNR 105.85 dB, max sidelobe level -23.41 dB">
-      <div class="figure-title">With Golay: SNR 105.85 dB</div>
-    </div>
-
-  </div>
-
-  <div class="figure-caption">
-    Normalized envelope (dB) of the RF line through the point target, showing
-    the mainlobe peak and the maximum sidelobe level.
-  </div>
-
+ 
   <!-- ---------- SNR ---------- -->
 
   <h3>SNR vs Depth</h3>
@@ -820,8 +788,7 @@
 
   <ul>
     <li>
-      How to define arbitrary transmit waveforms on the Verasonics Vantage
-      using <code>TW.type = 'States'</code>.
+      How to create arbitrary transmit waveforms.
     </li>
     <li>
       How multiple coded transmit waveforms are sequenced, transmitted, and
@@ -831,8 +798,8 @@
       How pulse compression and complementary-code decoding work in practice.
     </li>
     <li>
-      How the Vantage's transmit sampling rate (250&nbsp;MHz) differs from its
-      receive sampling rate (31.25&nbsp;MHz), and why this matters for
+      How difference between transmit sampling rate (250&nbsp;MHz) and 
+      receive sampling rate (31.25&nbsp;MHz) impacts
       matched filtering.
     </li>
   </ul>
@@ -858,22 +825,6 @@
 
 </section>
 
-<!-- =====================================================
-     NEXT STEPS
-     ===================================================== -->
-
-<section class="project-section">
-
-  <h2>Next Steps</h2>
-
-  <p>
-    The next step is <strong>Hadamard encoding</strong> across plane-wave
-    angles, which allows faster multi-angle acquisition. After that, the plan is
-    to combine Hadamard and Golay encoding, so that the SNR gain from Golay coding
-    can be kept without the frame-rate cost of paired transmissions.
-  </p>
-
-</section>
 
 <!-- =====================================================
      TOOLS
